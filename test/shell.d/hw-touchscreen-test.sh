@@ -37,6 +37,14 @@ printf '%s\n' '{"touch":[],"tablets":[{"name":"wacom-hid-52eb-pen"}]}' >"$tmpdir
   fail "tablet names are used when no touch devices exist" "$(hw_touchscreen)"
 pass "tablet names are used when no touch devices exist"
 
+# Hyprland lists a tablet's nameless pad before the tablet itself, so a drawing
+# tablet with express keys is no touchscreen, as before.
+printf '%s\n' '{"touch":[],"tablets":[{"type":"tabletPad","belongsTo":{"name":"wacom-intuos-s-pen"}},{"name":"wacom-intuos-s-pen"},{"type":"tabletTool"}]}' >"$tmpdir/devices.json"
+if hw_touchscreen >/dev/null 2>&1; then
+  fail "a tablet with a pad is not reported as a touchscreen" "$(hw_touchscreen)"
+fi
+pass "a tablet with a pad is not reported as a touchscreen"
+
 printf '%s\n' '{"touch":[],"tablets":[]}' >"$tmpdir/devices.json"
 if hw_touchscreen >/dev/null 2>&1; then
   fail "no touchscreen device reports failure"
