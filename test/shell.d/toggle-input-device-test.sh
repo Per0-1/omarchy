@@ -136,6 +136,15 @@ grep -Fx 'hl.device({ name = "elan9009:00-04f3:4448", enabled = true })' "$log_f
   fail "touchscreen enable re-enables a saved digitizer that is missing" "$(<"$log_file")"
 pass "touchscreen enable re-enables every saved digitizer"
 
+stub_device touchscreen $'elan9008:00-04f3:4447\nelan9009:00-04f3:4448'
+run_toggle touchscreen off
+stub_device touchscreen 'elan9008:00-04f3:4447'
+run_toggle touchscreen off
+[[ $(<"$ts_name_file") == $'elan9008:00-04f3:4447\nelan9009:00-04f3:4448' ]] ||
+  fail "a second disable keeps a saved digitizer that is missing" "$(<"$ts_name_file")"
+run_toggle touchscreen on
+pass "a second disable keeps every saved digitizer"
+
 : >"$log_file"
 rm -f "$marker"
 stub_device touchpad 'touchpad"; touch '"$marker"'; echo "'

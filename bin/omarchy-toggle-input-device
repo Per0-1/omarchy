@@ -56,6 +56,8 @@ apply_devices() {
   done
 }
 
+# Keep every name a disable saved, so a digitizer missing right now is neither
+# left disabled by enable nor dropped from the state by another disable.
 add_saved_names() {
   local saved name
   [[ -r $NAME_FILE ]] || return 0
@@ -70,8 +72,6 @@ add_saved_names() {
 }
 
 enable() {
-  # Re-enable every name the disable saved too, so a digitizer missing right
-  # now does not come back still disabled while the OSD says enabled.
   add_saved_names
   # Clear the persisted state before requiring a usable device, so a device
   # that stops reporting a valid name can never wedge the disable in place.
@@ -82,6 +82,7 @@ enable() {
 }
 
 disable() {
+  add_saved_names
   require_device
   apply_devices false
   mkdir -p "$(dirname "$NAME_FILE")"
