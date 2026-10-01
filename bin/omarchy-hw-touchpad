@@ -8,7 +8,7 @@
 # keyboard cover — which is what the hardware toggle is for, including when
 # that cover is on Bluetooth after undock.
 device=$(hyprctl devices -j | jq -r '
-  (.touch // [] | map(.name)) + (.tablets // [] | map(.name)) as $digitizers
+  ((.touch // [] | map(.name)) + (.tablets // [] | map(.name))) as $digitizers
   | [
       .mice[]?
       | .name
