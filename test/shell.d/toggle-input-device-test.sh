@@ -120,9 +120,21 @@ assert(seen[1].enabled == false and seen[2].enabled == false)
 LUA
 run_toggle touchscreen on
 [[ ! -e $ts_name_file ]] || fail "touchscreen enable clears every persisted device name"
+grep -Fx 'hl.device({ name = "elan9008:00-04f3:4447", enabled = true })' "$log_file" >/dev/null ||
+  fail "touchscreen enable applies the first digitizer"
 grep -Fx 'hl.device({ name = "elan9009:00-04f3:4448", enabled = true })' "$log_file" >/dev/null ||
   fail "touchscreen enable applies the second digitizer"
 pass "touchscreen toggle applies every digitizer"
+
+: >"$log_file"
+stub_device touchscreen $'elan9008:00-04f3:4447\nelan9009:00-04f3:4448'
+run_toggle touchscreen off
+stub_device touchscreen 'elan9008:00-04f3:4447'
+run_toggle touchscreen on
+[[ ! -e $ts_name_file ]] || fail "touchscreen enable clears a saved digitizer that is missing"
+grep -Fx 'hl.device({ name = "elan9009:00-04f3:4448", enabled = true })' "$log_file" >/dev/null ||
+  fail "touchscreen enable re-enables a saved digitizer that is missing" "$(<"$log_file")"
+pass "touchscreen enable re-enables every saved digitizer"
 
 : >"$log_file"
 rm -f "$marker"

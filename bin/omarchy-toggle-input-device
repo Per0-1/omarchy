@@ -56,7 +56,23 @@ apply_devices() {
   done
 }
 
+add_saved_names() {
+  local saved name
+  [[ -r $NAME_FILE ]] || return 0
+
+  while IFS= read -r saved; do
+    [[ -n $saved && $saved != *[[:cntrl:]]* ]] || continue
+    for name in "${names[@]}"; do
+      [[ $name == "$saved" ]] && continue 2
+    done
+    names+=("$saved")
+  done <"$NAME_FILE"
+}
+
 enable() {
+  # Re-enable every name the disable saved too, so a digitizer missing right
+  # now does not come back still disabled while the OSD says enabled.
+  add_saved_names
   # Clear the persisted state before requiring a usable device, so a device
   # that stops reporting a valid name can never wedge the disable in place.
   rm -f "$NAME_FILE"
